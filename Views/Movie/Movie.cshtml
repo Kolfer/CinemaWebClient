@@ -1,0 +1,123 @@
+﻿@using CinemaWebClient.Models.ViewEntities
+@using CinemaWebClient.Models
+@model MovieView
+
+@{
+    ViewBag.Title = Model.title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var name = Name;
+    var poster_path = Constans.tmbd + Model.poster_path;
+    int height = 45;
+    int width = 32;
+    int currentCast = 0;
+    var colorHeart = ViewBag.State.Item1 ? "red" : "gray";
+    var colorEye = ViewBag.State.Item2 ? "orange" : "gray";
+}
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+@Scripts.Render("~/Scripts/MovieScript.js")
+
+<div class="container mt-md-3 divBorder">
+
+    <h2 class="movie-name">@Model.title</h2>
+    <div class="row mt-md-1">
+        <div class="col-md-4">
+            <img class="img-thumbnail movie-picture" src="@poster_path"
+                 width="250" height="375" alt=""/>
+
+            <div class="row mt-md-1 mg-0">
+                <div id="watchMovie">
+                    <button type="submit" class="transparent" style="font-size:24px">
+                        <i class="fa fa-eye" style="font-size:24px;color:@colorEye"></i>
+                    </button>
+                </div>
+                <div id="likeMovie">
+                    <button type="submit" class="transparent" style="font-size:24px">
+                        <i class="fa fa-heart" style="font-size:24px;color:@colorHeart"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+            <table>
+                <tbody>
+                    <tr class="hrStyle">
+                        <td class="type">Tagline</td>
+                        <td class="tagline">@Model.tagline</td>
+                    </tr>
+                    <tr class="hrStyle">
+                        <td class="type">Status</td>
+                        <td class="status">@Model.Status</td>
+                    </tr>
+                    <tr class="hrStyle">
+                        <td class="type">Release Date</td>
+                        <td class="releaseDate">@Model.release_date</td>
+                    </tr>  
+                    <tr class="hrStyle">
+                        <td class="type">Budget</td>
+                        <td class="budget">@Model.Budget</td>
+                    </tr>   
+                    <tr class="hrStyle">
+                        <td class="type">Revenue</td>
+                        <td class="revenue">@Model.revenue</td>
+                    </tr>
+                    <tr class="hrStyle">
+                        <td class="type">Runtime</td>
+                        <td class="runtime">@Model.Runtime</td>
+                    </tr>
+                    <tr class="hrStyle">
+                        <td class="type">Production Countries</td>
+                        <td class="prodCountries">@Model.productionCompanies.CollectionAsString()</td>
+                    </tr>
+                    <tr class="hrStyle">
+                        <td class="type">Vote Average</td>
+                        <td class="average">@Model.vote_average</td>
+                    </tr>
+                    <tr class="hrStyle">
+                        <td class="type">Vote Count</td>
+                        <td class="count">@Model.vote_count</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row mg-0 mt-md-2">
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>№</th>
+                    <th>Name</th>
+                    <th>Personage</th>
+                </tr>
+            </thead>
+            <tbody class="table-casts">
+                @foreach(var cast in Model.casts.Take(10))
+                {
+                    var pathPhoto = cast?.people.profile_path != null
+                                    ? Constans.tmbd + cast.people.profile_path
+                                    : Constans.castPhotoDefault;
+                    var linkPerson = $"/Person/{cast.people.id}";
+                    <tr>
+                        <td>@currentCast</td>
+                        <td>
+                            <img src="@pathPhoto" height="@height" width="@width" />
+                            <a href="@linkPerson">@cast.people.name</a>
+                        </td>
+                        <td>@cast.character</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://rawgit.com/jackmoore/autosize/master/dist/autosize.min.js"></script>
+    <script>autosize(document.getElementsByTagName("textarea"))</script>
+    <script>
+        var movieSc = new MovieScript(@Model.Id, '@name');
+        movieSc.init();
+    </script>
+</div>

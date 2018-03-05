@@ -1,0 +1,142 @@
+﻿@using CinemaWebClient.Models.ViewEntities
+@using CinemaWebClient.Models
+@model PeopleView
+
+@{
+    ViewBag.Title = Model.name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var profilePath = Constans.tmbd + Model.profile_path;
+    int old = 0;
+    var genres = Model.getGenres();
+    DateTime birthday, deathday;
+    bool birthIsParse = DateTime.TryParse(Model.birthday, out birthday);
+    bool deathIsParse = DateTime.TryParse(Model.deathday, out deathday);
+    if (birthIsParse && birthday != default(DateTime))
+    {
+        if (deathIsParse && deathday != default(DateTime))
+        {
+            old = deathday.Year - birthday.Year;
+        }
+        else
+        {
+            old = DateTime.Now.Year - birthday.Year;
+        }
+    }
+}
+}
+
+<div class="mt-md-3">
+
+    <h3>@Model.name</h3>
+    <div class="row mt-md-1">
+        <div class="col-md-4">
+            <img class="img-thumbnail" src=@profilePath
+                 width="250" height="375" alt=@Model.name />
+        </div>
+        <table>
+            <tbody>
+                <tr class="hrStyle">
+                    <td class="type">Place of Birth : </td>
+                    <td>@Model.place_of_birth </td>
+                </tr>
+                @if (!string.IsNullOrEmpty(Model.birthday))
+                {
+                    <tr class="hrStyle">
+                        <td class="type">Old : </td>
+                        <td>@old years</td>
+                    </tr>
+                }
+                @if (Model.gender != 0)
+                {
+                    <tr class="hrStyle">
+                        <td class="type">Gender : </td>
+                        @if (Model.gender == 1)
+                        {
+                            <td>Female</td>
+                        }
+                        else if (Model.gender == 2)
+                        {
+                            <td>Male</td>
+                        }
+                    </tr>
+                }
+                @if (genres.Count() != 0)
+                {
+                    <tr class="hrStyle">
+                        <td class="type">Genres : </td>
+                        <td>
+                            @foreach (var genre in genres)
+                            {
+                                var genreLink = $"/Movie/{genre}";
+                                <a href="@genreLink">@genre.name</a>    
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (Model.jobs.Count != 0)
+                {   
+                    <tr class="hrStyle">
+                        <td class="type">Jobs :</td>
+                        <td>
+                            @foreach (var job in Model.jobs)
+                            {
+                                @: @job.name
+                        }
+                        </td>
+                    </tr>
+                }
+                @if (Model.popularity != 0)
+                {
+                    <tr class="hrStyle">
+                        <td class="type">Popularity : </td>
+                        <td>@Model.popularity</td>
+                    </tr>
+                }
+                <tr class="hrStyle">
+                    <td class="type">Count Movies : </td>
+                    <td>@Model.getCountMovie()</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row mt-md-1">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Name movie</th>
+                    <th>Character</th>
+                    <th>Vote movie</th>
+                    <th>Vote count</th>
+                    <th>Release date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cast in Model.casts)
+                {
+                    if (cast.movie.vote_average != 0 &&
+                    !string.IsNullOrEmpty(cast.movie.release_date))
+                    {
+                        @{  
+                            DateTime release;
+                            bool isParse = DateTime.TryParse(cast.movie.release_date, out release);
+                            string href = $"/Movie/{cast.movie.Id}";
+                        }
+                        <tr>
+                            <td><a href="@href">@cast.movie.title</a></td>
+                            <td>@cast.Name</td>
+                            <td>@cast.movie.vote_average</td>
+                            <td>@cast.movie.vote_count</td>
+                            @if (isParse)
+                            {
+                                <td>@release.Year</td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+

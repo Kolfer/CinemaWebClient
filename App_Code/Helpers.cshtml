@@ -1,0 +1,251 @@
+﻿@using System.Web.Mvc.Html
+@using CinemaWebClient.Models
+@using CinemaWebClient.Models.ViewEntities
+@using System.Security.Principal 
+
+
+
+@helper Header(System.Web.Mvc.HtmlHelper html) {
+    <div class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <div class="container">
+            <div class="collapse navbar-collapse" id="CollapseNavbar">
+                <ul class="navbar-nav mr-md-auto">
+                    <li class="nav-item">
+                        @html.ActionLink("Movies", "Index", "Home", new { area = "" },
+                             new { @class = "navbar-brand nav-link" })
+                    </li>
+                    <li class="nav-item">
+                        @html.ActionLink("Contact", "Contact", "Home", new { area = "" },
+                             new { @class = "nav-link" })
+                    </li>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="nav-item">
+                        @html.ActionLink("Log Out", "LogOut", "Authorize", new { area = "" },
+                     new { @class = "nav-link" })
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/User/@User.Identity.Name">
+                            @User.Identity.Name
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        @html.ActionLink("Sign In", "SignIn", "Authorize", new { area = "" },
+                        new { @class = "nav-link" })
+                    </li>
+                    <li class="nav-item">
+                        @html.ActionLink("Registration", "Register", "Authorize", new { area = "" },
+                        new { @class = "nav-link" })
+                    </li>
+                }
+                </ul>
+                <form action="Home/Search" class="form-inline my-2 my-lg-0">
+                    <input class="form-control mr-sm-2" name="query" type="text" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+
+@helper RenderMovies(System.Web.Mvc.HtmlHelper html, IEnumerable<MovieView> movies)
+{
+foreach (var movie in movies)
+{
+    string path = @"https://image.tmdb.org/t/p/w500" + movie.poster_path;
+        <div class="my-md-2">
+            <div class="row ml-md-1">
+                <h2>@html.ActionLink(movie.title, "Movie", "Movies", new { id = movie.Id }, null) </h2>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                    <img class="img-thumbnail" src="@path" width="250" height="375" />
+                </div>
+                <div class="col-md-7">
+                    <div class="row">
+                        <h5>Year :  </h5>
+                        @movie.release_date
+                    </div>
+                    <div class="row">
+                        <h5>Country :  </h5>
+                        @foreach (var country in movie.productionCountries)
+                        {
+                            @:  @country.Name,
+                        }
+                    </div>
+                    <div class="row">
+                        <h5>Сompanies :  </h5>
+                        @foreach (var companies in movie.productionCompanies)
+                        {
+                            @:  @companies.name,
+                    }
+                    </div>
+
+                    <div class="row">
+                        <h5>Genres :  </h5>
+                        @foreach (var genre in movie.genre)
+                        {
+                            @:  @html.ActionLink(genre.name, "Genre", "Movies",
+                               new { genre = genre.name }, null),
+                         }
+                    </div>
+
+                    <div class="row">
+                        <h5>Runtime :  </h5>
+                        @movie.Runtime minutes
+                    </div>
+
+                    <div class="row">
+                        <h5>Budget :  </h5>
+                        @movie.Budget$
+                    </div>
+                    <div class="row">
+                        <h5>Vote Average :  </h5>
+                        @movie.vote_average
+                    </div>
+                    <div class="row">
+                        <h5>Vote Count :  </h5>
+                        @movie.vote_count
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="hrStyleDashed my-md-2" />
+}
+}
+
+
+@helper  PublishMessage(MessageView msg, string msgStyle, int tabindex)
+{
+var time = msg.DateLastChange ?? msg.DateSend;
+var id = "msg" + msg.id;
+    <div id="@id" class="@msgStyle row" tabindex="@tabindex">
+        <h6 style="float:left">@msg.Text</h6>
+        <p class="h7" style="float:left">&nbsp @time.ToShortTimeString()</p>
+    </div>
+}
+
+
+@helper chat(ChatView chat, IIdentity identity)
+{
+
+var user = chat.getAnotherUser(identity.Name);
+var pathPhoto = chat.PathOfPhoto ?? user.PathOfPhoto;
+var nameChat = chat.Name ?? user.Name;
+var lastMsg = chat.messages.Last();
+var dateTime = lastMsg.DateSend;
+var lastSender = lastMsg.Sender.Name == identity.Name
+                  ? "You" : lastMsg.Sender.Name;
+
+    <div class="row item">
+        <div class="col-2 col-md-2 img pd-0 mg-5">
+            <img src="@pathPhoto" class="rounded-circle" width="32" height="32" />
+        </div>
+        <div class="col-8 col-md-8">
+            <div class="row">
+                <div class="col-md-8 col-8 pd-0"><strong>@nameChat</strong></div>
+                <div class="col-md-4 col-4 pd-0">@dateTime</div>
+            </div>
+            <div class="row">
+                <h6>@lastMsg.PartMessage(20)</h6>
+            </div>
+        </div>
+    </div>
+}
+
+@helper PublishReceiverInfo(UserView receiver)
+{
+
+    <div id="receiver" class="row" style="border-bottom:2px solid">
+
+        <div class="col-md-2 col-2">
+            <img src=@receiver.PathOfPhoto class="rounded-circle"
+                 width="32" height="32" />
+        </div>
+
+        <div id="currentReceiverInfo" class="col-md-8 col-8">
+            <div class="row"><strong>@receiver.Name</strong></div>
+            <div class="row">@receiver.LastSeen()</div>
+        </div>
+
+        <div class="col-md-2">
+        </div>
+
+    </div>
+}
+
+
+@helper PublishMessages(System.Web.Mvc.HtmlHelper html, IEnumerable<MessageView> messages,
+                                       UserView sender)
+{
+
+DateTime tempDate = DateTime.Now;
+var i = 1;
+
+    <div id="mainchat" class="col">
+        @foreach (var msg in messages)
+        {
+            @html.Raw(Extension.PublishDate(msg.DateSend, ref tempDate))
+            tempDate = msg.DateSend;
+
+            if (msg.Sender == sender)
+            {
+                <div class="row" style="float:right">
+                    @Helpers.PublishMessage(msg, "message message-green", i)
+                </div>
+            }
+            else
+            {
+                <div class="row" style="float:left">
+                    @Helpers.PublishMessage(msg, "message message-gray", i)
+                </div>
+            }
+            <div style="clear:both"></div>
+            { ++i; }
+        }
+    </div>
+}
+
+@helper SearchMessage(System.Web.Mvc.HtmlHelper html, MessageView message, string subStr, IIdentity identity)
+{
+
+var nameChat = message.Chat.Name ?? message.Sender.Name;
+var pathOfPhoto = message.Chat.PathOfPhoto ?? message.Sender.PathOfPhoto;
+var id = message.id + "s_msg";
+
+    <div id="@id" class="row item">
+        <div class="col-2 col-md-2 img pd-0 mg-5">
+            <img src="@pathOfPhoto" class="rounded-circle" width="32" height="32" />
+        </div>
+        <div class="col-8 col-md-8">
+            <div class="row">
+                <div class="col-md-6 col-6 pd-0"><strong>@nameChat</strong></div>
+                <div class="col-md-6 col-6 pd-0">@message.DateSend.ToPresentationFormat()</div>
+            </div>
+            <div class="row">
+                <h6>@message.PartMessage(20, subStr)</h6>
+            </div>
+        </div>
+    </div>
+
+}
+
+@helper PublishDate(string date)
+{
+    <div class="row dateOnChat">
+        @date
+    </div>
+    <div style="clear:both"></div>
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,87 @@
+﻿@using CinemaWebClient.Models.ViewEntities;
+@model ChatView
+
+@{
+    ViewBag.Title = "Chat";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var pair = Model.getUserPair(User.Identity.Name);
+    var messages = Model.messages.OrderBy(m => m.DateSend);
+    var lastDate = messages.Last().DateSend;
+    var lastMsgId = Model.messages.Last().id;
+    var sender = pair.Item1;
+    var receiver = pair.Item2;
+}
+
+
+@section  scripts{
+    @Scripts.Render("~/Scripts/jquery.signalR-2.2.2.min.js")
+    @Scripts.Render("~/signalr/hubs")
+    @Scripts.Render("~/Scripts/hubs.js")
+    @Scripts.Render("~/Scripts/chat.js")
+}
+
+<div class="row">
+
+    <div class="col-md-4 left-widget">
+
+        <div id="search" class="row">
+            <div class="col-md-10 col-10">
+                <input id="searchInput" placeholder="Search"
+                       type="text" class="form-control" name="keyword">
+            </div>
+            <div id="close" class="col-md-2 col-2 pd-0">
+                <button id="close" type="submit" class="transparent"
+                        style="font-size:24px">
+                    <i class="material-icons" style="font-size:24px">close</i>
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div id="chats" class="col">
+                @foreach (var chat in sender.chats)
+                {
+                    @Helpers.chat(chat, User.Identity)
+                }
+            </div>
+        </div>
+
+        <div id="searchMessages"></div>
+        <div id="loaderId"></div>
+    </div>
+
+    <div class="col-md-8" style="border-left:2px solid">
+
+        @Helpers.PublishReceiverInfo(receiver)
+
+        @Helpers.PublishMessages(Html, messages, sender)
+
+        <div class="row">
+            <div class="col-md-10 col-10">
+                <textarea class="form-control" id="message" name="message" rows="1"></textarea>
+            </div>
+            <div class="col-md-2 col-2">
+                <button id="sendmessage" type="submit" class="transparent"
+                        style="font-size:24px">
+                    <i class="fa fa-paper-plane-o" style="font-size:24px;color:blue"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://rawgit.com/jackmoore/autosize/master/dist/autosize.min.js"></script>
+<script>autosize(document.getElementsByTagName("textarea"))</script>
+
+<script>
+    $(document).ready(function () {
+        var chat = new Chat();
+        var hub = new Hub(@sender.Name, @receiver.Name, @Model.NumberId, 
+                          @lastDate.ToString(), @lastMsgId)
+        var scroll = $('#mainchat');
+        $('#msg' + @lastMsgId).focus();
+        $('#close').hide();
+        chat.init();
+    });
+</script>
+

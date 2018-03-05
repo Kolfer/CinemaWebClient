@@ -1,0 +1,150 @@
+﻿@using CinemaWebClient.Models.ViewEntities
+@using CinemaWebClient.Models
+@model UserView
+
+@{
+    ViewBag.Title = Model.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ChatView chat = null;
+    int? numberId = null;
+    if(ViewBag.IsFriend == RelationsUsers.Friend)
+    {
+        chat = Model.chats.FirstOrDefault(c => c.getAnotherUser(Name)?.Name == Model.Name);
+        numberId = chat.NumberId;
+    }
+}
+
+@Scripts.Render("~/Scripts/Users.js")
+
+<div class="mt-md-3 col-md-8 container pd-0 divBorder">
+
+    <div class="row mt-md-3 mx-md-3">
+        <div class="col-md-3 offset-md-1">
+            <img class="user-photo" src="@Model.PathOfPhoto"
+                 width="200" height="200" alt='' />
+        </div>
+        <div class="col-md-5">
+            <h2 class="user-name">@Model.Name</h2>
+            <table>
+                <tbody>
+                    <tr class="hrStyle">
+                        <td class="type">Gender</td>
+                        <td class="gender">@Extension.GenderAsStr(Model.gender)</td>
+                    </tr>
+                    <tr class="hrStyle">
+                        <td class="type">Date of registration</td>
+                        <td class="addedDate">@Model.AddedDate</td>
+                    </tr>
+                    <tr class="hrStyle">
+                        <td class="type">Country</td>
+                        <td class="country">@Model.country</td>
+                    </tr>
+                    <tr class="hrStyle">
+                        <td class="type">City</td>
+                        <td class="city">@Model.city</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-3">
+            @{ var status = Model.isOnline ? "Online" : "Offline"; }
+            <h4>@status</h4>
+            @if (ViewBag.IsFriend == RelationsUsers.SameUser)
+            {
+                <div class="row">
+                    <button id="editProfile" class="btn btn-primar">Edit profile</button>
+                </div>
+            }
+            else if (ViewBag.IsFriend == RelationsUsers.Visitor)
+            {
+                <div class="row">
+                    <button id="addFriend" class="btn btn-primary">Add as friend</button>
+                </div>
+            }
+            else if (ViewBag.IsFriend == RelationsUsers.Friend)
+            {
+                <div class="row">
+                      <button id="sendMessage" class="btn btn-primary">Send message</button>
+                </div>
+                <div class="row">
+                    <button id="removeFriend" class="btn btn-primary">Remove from friends</button>
+                </div>
+            }
+            else if(ViewBag.IsFriend == RelationsUsers.Subscriber)
+            {
+                <div class="row">
+                    <button id="cancelRequest" class="btn">Cancel Request</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row UserRow">
+
+        <div class="col-md-2 col-2 itemRow">
+            @{ var friends = $"/User/{Model.Name}/Friends"; }
+            <a id="link-friends" class="link-user" href="@friends">
+                <div class="col">
+                    <h3 id="countFriends">@Model.countFriends</h3>
+                    <h5>Friends</h5>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2 col-2 itemRow">
+            @{  var chats = $"/User/{Model.Name}/Chats"; }
+            <a id="link-chats" class="link-user" href="@chats">
+                <div class="col">
+                    <h3 id="countChats">@Model.countChats</h3>
+                    <h5>Chats</h5>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2 col-2 itemRow">
+            @{  var willWatch = $"/User/{Model.Name}/WillWatch"; }
+            <a id="link-willwatch" class="link-user" href="@willWatch">
+                <div class="col">
+                    <h3 id="countWillWatch">@Model.countWillWatch</h3>
+                    <h5>Will watch</h5>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2 col-2 itemRow">
+            @{ var likedMovies = $"/User/{Model.Name}/LikedMovies"; }
+            <a id="link-like" class="link-user" href="@likedMovies">
+                <div class="col">
+                    <h3 id="countLikeMovies">@Model.countLikedMovies</h3>
+                    <h5>Favorite movies</h5>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2 col-2 itemRow">
+            @{ var valuatedMovies = $"/User/{Model.Name}/VotedMovies"; }
+            <a id="link-voted" class="link-user" href="@valuatedMovies">
+                <div class="col">
+                    <h3 id="countVoted">@Model.countAppreciated</h3>
+                    <h5>Valuated movies</h5>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-2 col-2 itemRow">
+            @{ var linkOnFavoritePeople = $"/User/{Model.Name}/FavoritePeoples"; }
+            <a id="link-favoritepeople" class="link-user" href="@linkOnFavoritePeople">
+                <div class="col">
+                    <h3 id="countFavorites">@Model.countLikedPeople</h3>
+                    <h5>Favorite peoples</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    var users = new Users('@Model', '@Name', @numberId );
+    users.init();
+</script>

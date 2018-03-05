@@ -1,0 +1,12 @@
+﻿@using CinemaWebClient.Models.ViewEntities
+@model GenreView
+
+@{
+    ViewBag.Title = "MoviesByGenre";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@Helpers.RenderMovies(Html, Model.movies)
+
+
+
