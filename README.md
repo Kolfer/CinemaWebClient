@@ -1,5 +1,5 @@
 <h1>Project Title</h1>
-<p>CinemaWebClient is rest client,creating with ASP.NET MVC5</p>
+<p>CinemaWebClient is rest client,creating with ASP.NET MVC5.The development of project is continued. </p>
 <h2>Getting Started</h2>
 <p>These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.The development of project is continued</p>
 <h2>Prerequisites</h2>
